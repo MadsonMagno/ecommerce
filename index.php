@@ -7,6 +7,8 @@ require_once("vendor/autoload.php"); //TRAZENDO TODAS AS DEPENDENCIAS DO COMPPOS
 
 use \Slim\Slim; //USANDO CLASSES 
 use \Hcode\Page;
+use \Hcode\PageAdmin;
+
 
 $app = new Slim(); //UTILIZANDO A CLASSE DE ROTAS
 
@@ -17,6 +19,13 @@ $app->get('/', function() {//QUANDO CHAMAR VIA GET A PASTA RAIZ USA AS SEGUINTES
 $page = new Page(); //EXECUTA A FUNÇÃO PAGE
 $page->setTpl("index");//CARREGA O CONTEUDO NO TEMPLATE INDEX
 });
+
+$app->get('/admin', function() {//QUANDO CHAMAR VIA GET A PASTA RAIZ USA AS SEGUINTES FUNÇÕES
+    
+$page = new PageAdmin(); //EXECUTA A FUNÇÃO PAGE
+$page->setTpl("index");//CARREGA O CONTEUDO NO TEMPLATE INDEX
+});
+
 
 $app->run(); //APÓS TUDO CARREGADO, EXECUTA
 

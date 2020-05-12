@@ -7,12 +7,12 @@ class Page{
 	private $options = [];
 	private $defaults = [
 		"data"=>[]];
-	public function __construct($opts = array()){//deve ser o primeiro a ser exexcutado //recebe opções via array
+	public function __construct($opts = array(), $tpl_dir = "/views/"){//deve ser o primeiro a ser exexcutado //recebe opções via array
 
 		$this->options = array_merge($this->defaults, $opts); //mesclando os arrays $defaults e $opts com array merge e jogando em $options, $opts vai sobrescrever o array $defaults
 		//configurando template
 $config = array(
-					"tpl_dir"       => $_SERVER["DOCUMENT_ROOT"]."/views/",//pasta que busca os arquivos html
+					"tpl_dir"       => $_SERVER["DOCUMENT_ROOT"].$tpl_dir,//pasta que busca os arquivos html
 					"cache_dir"     => $_SERVER["DOCUMENT_ROOT"]."/views-cache/",//pasta que busca os arquivos html
 					"debug"         => false // set to false to improve the speed
 				   );
