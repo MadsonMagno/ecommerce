@@ -6,6 +6,8 @@ class Page{
 	private $tpl;//criando a variavel tpl
 	private $options = [];
 	private $defaults = [
+		"header"=>true,//definindo header e footer padrão 
+		"footer"=>true,
 		"data"=>[]];
 	public function __construct($opts = array(), $tpl_dir = "/views/"){//deve ser o primeiro a ser exexcutado //recebe opções via array
 
@@ -24,7 +26,7 @@ $config = array(
 
 	$this->setData($this->options["data"] );//chamando a funcção setData pra ser execccutada com os dados da variável $options
 
-	$this->tpl->draw("header"); //desenhando arquivo header que ira montar o cabeçalho html que se repete pra todas as paginas
+	if ($this->options["header"] === true) $this->tpl->draw("header"); //desenhando arquivo header que ira montar o cabeçalho html que se repete pra todas as paginas
 
 
 	}
@@ -47,7 +49,7 @@ public function setTpl ($name, $data = array(), $returnHtml = false){
 }
 	public function __destruct(){//deve ser o ultimo a ser executado
 
-		$this->tpl->draw("footer");//desenhando arquivo footer que ira montar o rodapé html que se repete pra todas as paginas
+		if ($this->options["footer"] === true) $this->tpl->draw("footer");//desenhando arquivo footer que ira montar o rodapé html que se repete pra todas as paginas
 
 
 	}
