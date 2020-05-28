@@ -33,7 +33,7 @@ $config = array(
 
 	private function setData($data=array()){
 		foreach ($data as $key => $value) {//pra cada opção dentro da variável $data recebida pela função
-		$this->tpl->assing($key,$value);//tpl recebe nome e valor da variavel passada para o template na variavel $data que é um array	
+		$this->tpl->assign($key,$value);//tpl recebe nome e valor da variavel passada para o template na variavel $data que é um array	
 
 
 	}
