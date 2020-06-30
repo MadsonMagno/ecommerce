@@ -100,7 +100,7 @@ public static function updateFile()
 
 	}
 
-	public function getProductsPage($page = 1, $itemsPerPage = 8)
+	public function getProductsPage($page = 1, $itemsPerPage = 4)
 	{
 
 		$start = ($page - 1) * $itemsPerPage;
