@@ -386,7 +386,7 @@ $app->post("/register", function(){
 
 	if (User::checkLoginExist($_POST['email']) === true) {
 
-		User::setErrorRegister("Este endereço de e-mail já está sendo usado por outro usuário.");
+		User::setErrorRegister("Este endereço de e-mail já está cadastrado.");
 		header("Location: /login");
 		exit;
 
