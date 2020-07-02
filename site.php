@@ -252,7 +252,6 @@ $app->post("/checkout", function(){
 	]);
 
 	$order->save();
-
 	switch ((int)$_POST['payment-method']) {
 
 		case 1:
