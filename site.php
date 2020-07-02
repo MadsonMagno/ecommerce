@@ -708,7 +708,15 @@ $app->post("/profile/change-password", function(){
 		header("Location: /profile/change-password");
 		exit;		
 
-	}
+	} 
+
+	if ($_POST['new_pass'] !== $_POST['new_pass_confirm']) {
+
+		User::setError("A nova senha nao foi confirmada.");
+		header("Location: /profile/change-password");
+		exit;		
+
+	} 
 
 	$user = User::getFromSession();
 
