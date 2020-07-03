@@ -1,55 +1,65 @@
 <?php 
-namespace Hcode\Model;//definindo o name espace dessa classe
-use \Hcode\DB\Sql;//usando o name space da classe Sql
+
+namespace Hcode\Model;
+
+use \Hcode\DB\Sql;
 use \Hcode\Model;
 use \Hcode\Mailer;
 
-class Category  extends Model{//criando classe User
+class Category extends Model {
 
-public static function listAll(){
+	public static function listAll()
+	{
 
-	$sql = new Sql();
-	return $sql->select("SELECT * FROM tb_categories ORDER BY descategory");
-}
+		$sql = new Sql();
 
-public function save(){
+		return $sql->select("SELECT * FROM tb_categories ORDER BY descategory");
 
-	$sql= new Sql();
-	$results = $sql->select("CALL `db_ecommerce`.`sp_categories_save`(:idcategory , :descategory)", 
-		array(
-		":idcategory"=>$this->getidcategory(),
-		":descategory"=>$this->getdescategory()
+	}
 
-		
+	public function save()
+	{
 
-	));
+		$sql = new Sql();
 
-Category::updateFile();
-	$this->setData($results[0]);
+		$results = $sql->select("CALL sp_categories_save(:idcategory, :descategory)", array(
+			":idcategory"=>$this->getidcategory(),
+			":descategory"=>$this->getdescategory()
+		));
 
-}
+		$this->setData($results[0]);
 
-public  function get($idcategory){
+		Category::updateFile();
 
-	$sql= new Sql();
+	}
 
-	$results = $sql->select("SELECT * FROM tb_categories WHERE idcategory = :idcategory", 
-		[':idcategory'=>$idcategory]);
+	public function get($idcategory)
+	{
 
-	$this->setData($results[0]);
-}
+		$sql = new Sql();
 
-public function delete(){
-	$sql = new Sql;
+		$results = $sql->select("SELECT * FROM tb_categories WHERE idcategory = :idcategory", [
+			':idcategory'=>$idcategory
+		]);
 
-	$sql->query("DELETE FROM tb_categories where idcategory = :idcategory", [
-		":idcategory"=>$this->getidcategory()]
-	);
+		$this->setData($results[0]);
 
-	Category::updateFile();
-}
+	}
 
-public static function updateFile()
+	public function delete()
+	{
+
+		$sql = new Sql();
+
+		$sql->query("DELETE FROM tb_categories WHERE idcategory = :idcategory", [
+			':idcategory'=>$this->getidcategory()
+		]);
+
+		Category::updateFile();
+
+	}
+
+	public static function updateFile()
 	{
 
 		$categories = Category::listAll();
@@ -64,7 +74,6 @@ public static function updateFile()
 
 	}
 
-
 	public function getProducts($related = true)
 	{
 
@@ -76,7 +85,7 @@ public static function updateFile()
 				SELECT * FROM tb_products WHERE idproduct IN(
 					SELECT a.idproduct
 					FROM tb_products a
-					INNER JOIN tb_categoriesproducts b ON a.idproduct = b.idproduct
+					INNER JOIN tb_productscategories b ON a.idproduct = b.idproduct
 					WHERE b.idcategory = :idcategory
 				);
 			", [
@@ -89,7 +98,7 @@ public static function updateFile()
 				SELECT * FROM tb_products WHERE idproduct NOT IN(
 					SELECT a.idproduct
 					FROM tb_products a
-					INNER JOIN tb_categoriesproducts b ON a.idproduct = b.idproduct
+					INNER JOIN tb_productscategories b ON a.idproduct = b.idproduct
 					WHERE b.idcategory = :idcategory
 				);
 			", [
@@ -100,7 +109,7 @@ public static function updateFile()
 
 	}
 
-	public function getProductsPage($page = 1, $itemsPerPage = 4)
+	public function getProductsPage($page = 1, $itemsPerPage = 8)
 	{
 
 		$start = ($page - 1) * $itemsPerPage;
@@ -110,7 +119,7 @@ public static function updateFile()
 		$results = $sql->select("
 			SELECT SQL_CALC_FOUND_ROWS *
 			FROM tb_products a
-			INNER JOIN tb_categoriesproducts b ON a.idproduct = b.idproduct
+			INNER JOIN tb_productscategories b ON a.idproduct = b.idproduct
 			INNER JOIN tb_categories c ON c.idcategory = b.idcategory
 			WHERE c.idcategory = :idcategory
 			LIMIT $start, $itemsPerPage;
@@ -133,7 +142,7 @@ public static function updateFile()
 
 		$sql = new Sql();
 
-		$sql->query("INSERT INTO tb_categoriesproducts (idcategory, idproduct) VALUES(:idcategory, :idproduct)", [
+		$sql->query("INSERT INTO tb_productscategories (idcategory, idproduct) VALUES(:idcategory, :idproduct)", [
 			':idcategory'=>$this->getidcategory(),
 			':idproduct'=>$product->getidproduct()
 		]);
@@ -145,15 +154,64 @@ public static function updateFile()
 
 		$sql = new Sql();
 
-		$sql->query("DELETE FROM tb_categoriesproducts WHERE idcategory = :idcategory AND idproduct = :idproduct", [
+		$sql->query("DELETE FROM tb_productscategories WHERE idcategory = :idcategory AND idproduct = :idproduct", [
 			':idcategory'=>$this->getidcategory(),
 			':idproduct'=>$product->getidproduct()
 		]);
 
 	}
+			
+	public static function getPage($page = 1, $itemsPerPage = 10)
+	{
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_categories 
+			ORDER BY descategory
+			LIMIT $start, $itemsPerPage;
+		");
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
+		return [
+			'data'=>$results,
+			'total'=>(int)$resultTotal[0]["nrtotal"],
+			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+
+	}
+
+	public static function getPageSearch($search, $page = 1, $itemsPerPage = 10)
+	{
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_categories 
+			WHERE descategory LIKE :search
+			ORDER BY descategory
+			LIMIT $start, $itemsPerPage;
+		", [
+			':search'=>'%'.$search.'%'
+		]);
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
+		return [
+			'data'=>$results,
+			'total'=>(int)$resultTotal[0]["nrtotal"],
+			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+
+	}
 
 }
-
-
 
  ?>
