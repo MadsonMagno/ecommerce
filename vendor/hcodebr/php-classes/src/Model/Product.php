@@ -1,19 +1,23 @@
 <?php 
-namespace Hcode\Model;//definindo o name espace dessa classe
-use \Hcode\DB\Sql;//usando o name space da classe Sql
+
+namespace Hcode\Model;
+
+use \Hcode\DB\Sql;
 use \Hcode\Model;
 use \Hcode\Mailer;
 
-class Product  extends Model{//criando classe User
+class Product extends Model {
 
-public static function listAll(){
+	public static function listAll()
+	{
 
-	$sql = new Sql();
-	return $sql->select("SELECT * FROM db_ecommerce.tb_products ORDER BY desproduct");
-}
+		$sql = new Sql();
 
+		return $sql->select("SELECT * FROM tb_products ORDER BY desproduct");
 
-public static function checkList($list)
+	}
+
+	public static function checkList($list)
 	{
 
 		foreach ($list as &$row) {
@@ -28,8 +32,7 @@ public static function checkList($list)
 
 	}
 
-
-public function save()
+	public function save()
 	{
 
 		$sql = new Sql();
@@ -49,7 +52,7 @@ public function save()
 
 	}
 
-public function get($idproduct)
+	public function get($idproduct)
 	{
 
 		$sql = new Sql();
@@ -96,6 +99,7 @@ public function get($idproduct)
 		return $this->setdesphoto($url);
 
 	}
+
 	public function getValues()
 	{
 
@@ -145,7 +149,6 @@ public function get($idproduct)
 
 	}
 
-
 	public function getFromURL($desurl)
 	{
 
@@ -158,13 +161,14 @@ public function get($idproduct)
 		$this->setData($rows[0]);
 
 	}
+
 	public function getCategories()
 	{
 
 		$sql = new Sql();
 
 		return $sql->select("
-			SELECT * FROM tb_categories a INNER JOIN tb_categoriesproducts b ON a.idcategory = b.idcategory WHERE b.idproduct = :idproduct
+			SELECT * FROM tb_categories a INNER JOIN tb_productscategories b ON a.idcategory = b.idcategory WHERE b.idproduct = :idproduct
 		", [
 
 			':idproduct'=>$this->getidproduct()
@@ -172,8 +176,57 @@ public function get($idproduct)
 
 	}
 
+	public static function getPage($page = 1, $itemsPerPage = 10)
+	{
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_products 
+			ORDER BY desproduct
+			LIMIT $start, $itemsPerPage;
+		");
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
+		return [
+			'data'=>$results,
+			'total'=>(int)$resultTotal[0]["nrtotal"],
+			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+
+	}
+
+	public static function getPageSearch($search, $page = 1, $itemsPerPage = 10)
+	{
+
+		$start = ($page - 1) * $itemsPerPage;
+
+		$sql = new Sql();
+
+		$results = $sql->select("
+			SELECT SQL_CALC_FOUND_ROWS *
+			FROM tb_products 
+			WHERE desproduct LIKE :search
+			ORDER BY desproduct
+			LIMIT $start, $itemsPerPage;
+		", [
+			':search'=>'%'.$search.'%'
+		]);
+
+		$resultTotal = $sql->select("SELECT FOUND_ROWS() AS nrtotal;");
+
+		return [
+			'data'=>$results,
+			'total'=>(int)$resultTotal[0]["nrtotal"],
+			'pages'=>ceil($resultTotal[0]["nrtotal"] / $itemsPerPage)
+		];
+
+	}
 
 }
-
 
  ?>
